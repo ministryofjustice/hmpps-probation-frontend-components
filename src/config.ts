@@ -18,11 +18,5 @@ export default {
     feComponents: {
       url: get('COMPONENT_API_URL', 'http://fe-components', requiredInProduction),
     },
-    prisonApi: {
-      url: get('PRISON_API_URL', null),
-    },
-    allocationsApi: {
-      url: get('ALLOCATIONS_API_URL', null),
-    },
   },
 }

@@ -1,3 +1,7 @@
-.govuk-footer {
-  min-height: 160px;
+@import "govuk-frontend/dist/govuk/objects/width-container";
+
+.probation-common-fallback-footer {
+  background: $govuk-template-background-colour;
+  min-height: 100px;
 }
+

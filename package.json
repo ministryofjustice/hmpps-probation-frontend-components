@@ -1,7 +1,7 @@
 {
-  "name": "@ministryofjustice/hmpps-connect-dps-components",
-  "version": "2.2.0",
-  "description": "A package to allow the inclusion of connect dps micro frontend components within dps applications",
+  "name": "@ministryofjustice/hmpps-probation-frontend-components",
+  "version": "1.0.0-beta.0",
+  "description": "A package to allow the inclusion of connect pds micro frontend components within pds applications",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
@@ -10,10 +10,12 @@
   "scripts": {
     "prepare": "hmpps-precommit-hooks-prepare",
     "build": "tsc && npm run copy:assets",
+    "clean": "find . -name '.eslintcache' -delete",
     "test": "jest",
     "test:ci": "jest --runInBand --passWithNoTests",
     "typecheck": "tsc",
     "lint": "eslint . --cache --max-warnings 0",
+    "lint:fix": "eslint . --cache --max-warnings 0 --fix",
     "copy:assets": "rm -rf dist/assets && cp -r src/assets dist/assets",
     "security_audit": "npx audit-ci --config audit-ci.json",
     "precommit:secrets": "gitleaks git --pre-commit --redact --staged --verbose --config .gitleaks/config.toml",
@@ -67,14 +69,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/ministryofjustice/hmpps-connect-dps-components.git"
+    "url": "git+ssh://git@github.com:ministryofjustice/hmpps-probation-frontend-components.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ministryofjustice/hmpps-connect-dps-components/issues"
+    "url": "https://github.com/ministryofjustice/hmpps-probation-frontend-components/issues"
   },
-  "homepage": "https://github.com/ministryofjustice/hmpps-connect-dps-components#readme",
+  "homepage": "https://github.com/ministryofjustice/hmpps-probation-frontend-components#readme",
   "devDependencies": {
     "@ministryofjustice/eslint-config-hmpps": "^0.0.1",
     "@ministryofjustice/hmpps-precommit-hooks": "^0.0.3",
