@@ -90,7 +90,11 @@ jobs:
           root_path=$(pwd)
           name=$(jq -r .name package.json)
 
-          latest_version=$(npm view $name version || echo unpublished)
+          if latest_version=$(npm view "@ministryofjustice/hmpps-probation-frontend-components" version --silent 2>/dev/null); then
+            :
+          else
+            latest_version="unpublished"
+          fi
           version=$(jq -r .version package.json)
 
           if [ "$version" == "$latest_version" ]; then
