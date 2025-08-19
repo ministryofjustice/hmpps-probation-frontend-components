@@ -8,12 +8,11 @@ import { HmppsUser } from './types/HmppsUser'
 const defaultOptions: Partial<RequestOptions> = {
   logger: console,
   timeoutOptions: { response: 2500, deadline: 2500 },
-  includeSharedData: false,
   useFallbacksByDefault: false,
 }
 
 export default function getFrontendComponents(requestOptions?: RequestOptions): RequestHandler {
-  const { logger, timeoutOptions, includeSharedData, useFallbacksByDefault } = {
+  const { logger, timeoutOptions, useFallbacksByDefault } = {
     ...defaultOptions,
     ...requestOptions,
   }
@@ -22,7 +21,7 @@ export default function getFrontendComponents(requestOptions?: RequestOptions): 
     const useFallbacks = (user: HmppsUser) => {
       res.locals.feComponents = {
         header: getFallbackHeader(user, requestOptions),
-        footer: getFallbackFooter(user, requestOptions),
+        footer: getFallbackFooter(),
         cssIncludes: [],
         jsIncludes: [],
       }
@@ -41,21 +40,13 @@ export default function getFrontendComponents(requestOptions?: RequestOptions): 
     }
 
     try {
-      const { header, footer, meta } = await componentApiClient.getComponents(
-        res.locals.user.token,
-        timeoutOptions,
-        logger,
-      )
+      const { header, footer } = await componentApiClient.getComponents(res.locals.user.token, timeoutOptions, logger)
 
       res.locals.feComponents = {
         header: header.html,
         footer: footer.html,
         cssIncludes: [...header.css, ...footer.css],
         jsIncludes: [...header.javascript, ...footer.javascript],
-      }
-
-      if (includeSharedData) {
-        res.locals.feComponents.sharedData = meta
       }
 
       updateCsp(res)

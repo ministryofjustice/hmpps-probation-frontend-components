@@ -1,6 +1,3 @@
-import CaseLoad from './CaseLoad'
-import { AllocationJobResponsibility } from './AllocationJobResponsibility'
-
 export type AuthSource = 'nomis' | 'delius' | 'external' | 'azuread'
 
 /**
@@ -26,11 +23,6 @@ export interface BaseUser {
  */
 export interface PrisonUser extends BaseUser {
   authSource: 'nomis'
-  staffId: number
-  caseLoads: CaseLoad[]
-  activeCaseLoad?: CaseLoad
-  activeCaseLoadId?: string
-  allocationJobResponsibilities?: AllocationJobResponsibility[]
 }
 
 /**
