@@ -1,7 +1,7 @@
-# hmpps-probation-components
+# hmpps-probation-frontend-components
 
-`hmpps-probation-components` is a Node.js client library to simplify the process of incorporating global components 
-within PDS applications. We welcome feedback on this README [here](https://moj.enterprise.slack.com/archives/C04JFG3QJE6)
+`hmpps-probation-frontend-components` is a Node.js client library to simplify the process of incorporating global components 
+within PDS applications. We welcome feedback on this Slack channel [here](https://moj.enterprise.slack.com/archives/C08RXCS63TM)
 in order to improve it.
 
 ## Contents
@@ -16,9 +16,11 @@ in order to improve it.
 
 The package assumes adherance to the standard [hmpps-template-typescript](https://github.com/ministryofjustice/hmpps-template-typescript) project.
 It requires:
- - a user object to be available on `res.locals` containing a token, displayName, and authSource.
+ - a user object to be available on `res.locals` containing a token and displayName.
  - nunjucks to be setup
- - an environment variable to be set for the micro frontend components api called `COMPONENT_API_URL`
+ - the environment variable `COMPONENT_API_URL` to be set for each environment
+ - the environment variables `AUTH_CODE_CLIENT_ID` and `AUTH_CODE_CLIENT_SECRET` to be set to allow authenticating with the dev environment locally
+ - the environment variable `HMPPS_AUTH_URL` to be set to `https://sign-in-dev.hmpps.service.justice.gov.uk/auth` to authenticate with the dev environment locally
  - to be run AFTER helmet middleware
 
 ### Installation
@@ -26,25 +28,47 @@ It requires:
 To install the package, run the following command:
 
 ```bash
-npm install @ministryofjustice/hmpps-probation-components
+npm install @ministryofjustice/hmpps-probation-frontend-components
 ```
 
 ### Usage
 
-Currently, the package provides the header and the footer component.
+Add environment variables to the `helm_deploy/values-{env}.yaml` files for `COMPONENT_API_URL`. Populate with the following values:
 
-To incorporate use the middleware for appropriate routes within your Express application:
+dev - https://probation-frontend-components-dev.hmpps.service.justice.gov.uk
+
+preprod - https://probation-frontend-components-preprod.hmpps.service.justice.gov.uk
+
+prod - https://probation-frontend-components.hmpps.service.justice.gov.uk
+
+You can also add this to your `.env` or `docker-compose` files with the dev url, as follows:
+
+```
+- COMPONENT_API_URL=https://probation-frontend-components-dev.hmpps.service.justice.gov.uk
+```
+
+Add a block for the component library in the `apis` section of `server/config.ts`, for example:
 
 ```javascript
-    import pdsComponents from '@ministryofjustice/hmpps-probation-components'
+probationApi: {
+  url: get('COMPONENT_API_URL', 'https://probation-frontend-components-dev.hmpps.service.justice.gov.uk', requiredInProduction),
+  healthPath: '/health/ping'
+}
+```
+
+Currently, the package provides the header and the footer component.
+
+To incorporate use the middleware for appropriate routes within your Express application (after the `setUpCurrentUser` middleware):
+
+```javascript
+    import pdsComponents from '@ministryofjustice/hmpps-probation-frontend-components'
 
     ...
 
     app.use(pdsComponents.getPageComponents({
-      pdsUrl: config.serviceUrls.digitalPrison,
+      pdsUrl: config.apis.probationApi.url,
       logger,
-    })
-  )
+    }))
 ```
 
 **However, please 🙏 consider carefully whether you need the components for EVERY request.**
@@ -53,34 +77,13 @@ It may be sufficient for you app to only request components for GET requests for
 
 ```javascript
     app.get('*', pdsComponents.getPageComponents({
-      pdsUrl: config.serviceUrls.digitalPrison,
+      pdsUrl: config.apis.probationApi.url,
       logger,
     })
   )
 ```
 
-may be more appropriate, especially if you use the [PRG pattern](https://en.wikipedia.org/wiki/Post/Redirect/Get) to
-handle form submission. This will help us to reduce the load on the micro frontend components API. You may wish to
-go even further, for example avoiding routes that don't need components - the Prisoner Profile does
-something like this to avoid the component API call for the following routes: `/api` (provides prisoner images) and `/` 
-(a redirect only route).
-
-```javascript
-    app.get(
-      /^(?!\/api|^\/$).*/,
-      pdsComponents.getPageComponents({
-        pdsUrl: config.serviceUrls.digitalProbation,
-        logger,
-      }),
-      (req, res) => {
-        res.render('probationProfile')
-      },
-    )
-```
-
-There are a [number of options](./src/index.ts) available depending on your requirements.
-
-Add the `hmpps-probation-components` path to the nunjucksSetup.ts file to enable css to be loaded:
+Add the `hmpps-probation-frontend-components` path to the nunjucksSetup.ts file to enable css to be loaded:
 
 ```javascript
     const njkEnv = nunjucks.configure(
@@ -90,7 +93,7 @@ Add the `hmpps-probation-components` path to the nunjucksSetup.ts file to enable
     'node_modules/govuk-frontend/dist/components/',
     'node_modules/@ministryofjustice/frontend/',
     'node_modules/@ministryofjustice/frontend/moj/components/',
-    'node_modules/@ministryofjustice/hmpps-probation-components/dist/assets/',
+    'node_modules/@ministryofjustice/hmpps-probation-frontend-components/dist/assets/',
   ],
   {
     autoescape: true,
@@ -99,10 +102,10 @@ Add the `hmpps-probation-components` path to the nunjucksSetup.ts file to enable
 )
 ```
 
-Include the package scss within the all.scss file
+Include the package scss within the `index.scss` file
 ```scss
-  @import 'node_modules/@ministryofjustice/hmpps-probation-components/dist/assets/footer';
-  @import 'node_modules/@ministryofjustice/hmpps-probation-components/dist/assets/header';
+  @import 'node_modules/@ministryofjustice/hmpps-probation-frontend-components/dist/assets/footer';
+  @import 'node_modules/@ministryofjustice/hmpps-probation-frontend-components/dist/assets/header';
 ```
 
 Include reference to the components in your layout.njk file:
@@ -143,7 +146,7 @@ of routes. e.g. in `setUpAuthentication.ts` on the `/autherror` path:
   )
 ```
 
-This will provide a stripped down header for if there is no user object on `res.locals`.
+This will provide a stripped down header if there is no user object on `res.locals`.
 
 ### CSP
 

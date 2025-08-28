@@ -1,6 +1,6 @@
 {
   "name": "@ministryofjustice/hmpps-probation-frontend-components",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "description": "A package to allow the inclusion of connect pds micro frontend components within pds applications",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
