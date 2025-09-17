@@ -100,7 +100,7 @@
     "ts-jest": "^29.3.4"
   },
   "dependencies": {
-    "@types/node": "22.12.0",
+    "@types/node": "22.18.5",
     "@types/nunjucks": "^3.2.6",
     "nunjucks": "^3.2.4",
     "superagent": "^9.0.2"
