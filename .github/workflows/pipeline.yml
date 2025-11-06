@@ -70,6 +70,9 @@ jobs:
       - test
       - lint
     if: github.event_name == 'release' && github.event.action == 'published'
+    id_tokens:
+      NPM_ID_TOKEN:
+        aud: "npm:registry.npmjs.org"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
