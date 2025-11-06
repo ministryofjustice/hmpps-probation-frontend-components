@@ -70,9 +70,6 @@ jobs:
       - test
       - lint
     if: github.event_name == 'release' && github.event.action == 'published'
-    id_tokens:
-      NPM_ID_TOKEN:
-        aud: "npm:registry.npmjs.org"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -114,5 +111,3 @@ jobs:
             echo "→ Publishing package ${name} v${version} to npmjs.com"
             npm publish --provenance --access public
           fi
-        env:
-          GH_TOKEN: ${{ github.token }}
