@@ -90,7 +90,7 @@
     "govuk-frontend": "^6.1.0",
     "jest": "^30.3.0",
     "jest-html-reporter": "^4.4.0",
-    "jest-junit": "^16.0.0",
+    "jest-junit": "^17.0.0",
     "lint-staged": "^16.1.2",
     "nock": "^14.0.12",
     "supertest": "^7.1.1",
