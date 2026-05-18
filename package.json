@@ -76,7 +76,7 @@
   "homepage": "https://github.com/ministryofjustice/hmpps-probation-frontend-components#readme",
   "devDependencies": {
     "@ministryofjustice/eslint-config-hmpps": "^1.0.3",
-    "@ministryofjustice/hmpps-precommit-hooks": "^2.0.2",
+    "@ministryofjustice/hmpps-precommit-hooks": "^3.0.0",
     "@types/bunyan": "^1.8.11",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
@@ -91,7 +91,7 @@
     "jest": "^30.3.0",
     "jest-html-reporter": "^4.4.0",
     "jest-junit": "^17.0.0",
-    "lint-staged": "^16.1.2",
+    "lint-staged": "^17.0.4",
     "nock": "^14.0.12",
     "supertest": "^7.1.1",
     "ts-jest": "^29.3.4"
