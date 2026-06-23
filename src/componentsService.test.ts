@@ -2,9 +2,11 @@ import nock from 'nock'
 import * as cheerio from 'cheerio'
 import { Request, Response, NextFunction } from 'express'
 import nunjucks from 'nunjucks'
+import { describe } from 'node:test'
 import getFrontendComponents from './componentsService'
 import config from './config'
 import { HmppsUser, ProbationUser } from './types/HmppsUser'
+import * as UpdateCspModule from './utils/updateCsp'
 import ComponentApiClientModule from './data/componentApi/componentApiClient'
 
 const probationUser = { token: 'token', authSource: 'delius', displayName: 'Edwin Shannon' } as ProbationUser
@@ -13,10 +15,8 @@ const apiResponse = {
   footer: { html: 'footer', css: ['footer.css'], javascript: ['footer.js'] },
 }
 
-let componentsApi: nock.Scope
-
 beforeEach(() => {
-  componentsApi = nock(config.apis.feComponents.url)
+  //
 })
 
 afterEach(() => {
@@ -29,20 +29,230 @@ nunjucks.configure(
 )
 
 describe('getFrontendComponents', () => {
-  it('request the compnents content from the API clients', async () => {
-    // Given
-    const middleware = getFrontendComponents({ pdsUrl: '' })
-    const req = {} as Request
-    const res = {
+  function stubGetComponent(response: any) {
+    jest.spyOn(ComponentApiClientModule, 'getComponents').mockResolvedValue(response)
+  }
+
+  function createResponseObject(token: string) {
+    return {
       locals: {
-        user: { token: 'hgjgjhgjhg' },
+        user: { token },
       },
     } as any as Response
-    jest.spyOn(ComponentApiClientModule, 'getComponents').mockResolvedValue({})
+  }
 
-    // When
-    await middleware(req, res, jest.fn() as NextFunction)
+  function createResponseObjectWithNoUser() {
+    return {
+      locals: {},
+    } as any as Response
+  }
 
-    // Then
+  const stubUpdateCsp = () => jest.spyOn(UpdateCspModule, 'default').mockImplementation(jest.fn())
+
+  describe('when API client successfully fetches the content', () => {
+    it('request the compnents content from the API clients', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '' })
+      stubUpdateCsp()
+      const req = {} as Request
+      const res = createResponseObject('hgjgjhgjhg')
+      stubGetComponent(apiResponse)
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(ComponentApiClientModule.getComponents).toHaveBeenCalledWith({
+        userToken: 'hgjgjhgjhg',
+        timeoutOptions: { response: 2500, deadline: 2500 },
+        log: console,
+      })
+    })
+
+    it('request the compnents content with the added classes when provided', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '', classes: 'my-classes' })
+      stubUpdateCsp()
+      const req = {} as Request
+      const res = createResponseObject('hgjgjhgjhg')
+      stubGetComponent(apiResponse)
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(ComponentApiClientModule.getComponents).toHaveBeenCalledWith({
+        userToken: 'hgjgjhgjhg',
+        timeoutOptions: { response: 2500, deadline: 2500 },
+        log: console,
+        classes: 'my-classes',
+      })
+    })
+
+    it('sets the header component content from the API response in the response object', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '', classes: 'my-classes' })
+      stubUpdateCsp()
+      const req = {} as Request
+      const res = createResponseObject('hgjgjhgjhg')
+      stubGetComponent(apiResponse)
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(res.locals.feComponents).toBeDefined()
+      expect(res.locals.feComponents.header).toEqual('header')
+      expect(res.locals.feComponents.cssIncludes[0]).toEqual('header.css')
+      expect(res.locals.feComponents.jsIncludes[0]).toEqual('header.js')
+    })
+
+    it('sets the footer component content from the API response in the response object', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '' })
+      stubUpdateCsp()
+      const req = {} as Request
+      const res = createResponseObject('hgjgjhgjhg')
+      stubGetComponent(apiResponse)
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(res.locals.feComponents).toBeDefined()
+      expect(res.locals.feComponents.footer).toEqual('footer')
+      expect(res.locals.feComponents.cssIncludes[1]).toEqual('footer.css')
+      expect(res.locals.feComponents.jsIncludes[1]).toEqual('footer.js')
+    })
+  })
+
+  describe('When fallback is requested', () => {
+    it('must not call getComponents()', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true })
+      const req = {} as Request
+      const res = createResponseObject('hgjgjhgjhg')
+      jest.spyOn(ComponentApiClientModule, 'getComponents')
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(ComponentApiClientModule.getComponents).not.toHaveBeenCalled()
+    })
+
+    it('return the content of the header fallback component', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true })
+      const req = {} as Request
+      const res = createResponseObject('hgjgjhgjhg')
+      jest.spyOn(ComponentApiClientModule, 'getComponents')
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(res.locals.feComponents).toBeDefined()
+      expect(res.locals.feComponents.header).toContain('probation-common-fallback-header__link')
+    })
+
+    it('return the content of the footer fallback component', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true })
+      const req = {} as Request
+      const res = createResponseObject('hgjgjhgjhg')
+      jest.spyOn(ComponentApiClientModule, 'getComponents')
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(res.locals.feComponents).toBeDefined()
+      expect(res.locals.feComponents.footer).toContain('probation-common-fallback-footer')
+      expect(res.locals.feComponents.cssIncludes).toHaveLength(0)
+      expect(res.locals.feComponents.jsIncludes).toHaveLength(0)
+    })
+  })
+
+  describe('when no user token is provided', () => {
+    it('must not call getComponents()', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '' })
+      const req = {} as Request
+      const res = createResponseObjectWithNoUser()
+      jest.spyOn(ComponentApiClientModule, 'getComponents')
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(ComponentApiClientModule.getComponents).not.toHaveBeenCalled()
+    })
+
+    it('return the content of the header fallback component', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '' })
+      const req = {} as Request
+      const res = createResponseObjectWithNoUser()
+      jest.spyOn(ComponentApiClientModule, 'getComponents')
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(res.locals.feComponents).toBeDefined()
+      expect(res.locals.feComponents.header).toContain('probation-common-fallback-header__link')
+    })
+
+    it('return the content of the footer fallback component', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '' })
+      const req = {} as Request
+      const res = createResponseObjectWithNoUser()
+      jest.spyOn(ComponentApiClientModule, 'getComponents')
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(res.locals.feComponents).toBeDefined()
+      expect(res.locals.feComponents.footer).toContain('probation-common-fallback-footer')
+      expect(res.locals.feComponents.cssIncludes).toHaveLength(0)
+      expect(res.locals.feComponents.jsIncludes).toHaveLength(0)
+    })
+  })
+
+  describe('When getComponents() call throws', () => {
+    it('return the content of the header fallback component', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '' })
+      const req = {} as Request
+      const res = createResponseObject('hgjgjhgjhg')
+      jest.spyOn(ComponentApiClientModule, 'getComponents').mockRejectedValue('some sort of exception')
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(res.locals.feComponents).toBeDefined()
+      expect(res.locals.feComponents.header).toContain('probation-common-fallback-header__link')
+    })
+
+    it('return the content of the footer fallback component', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '' })
+      const req = {} as Request
+      const res = createResponseObject('hgjgjhgjhg')
+      jest.spyOn(ComponentApiClientModule, 'getComponents').mockRejectedValue('some sort of exception')
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(res.locals.feComponents).toBeDefined()
+      expect(res.locals.feComponents.footer).toContain('probation-common-fallback-footer')
+      expect(res.locals.feComponents.cssIncludes).toHaveLength(0)
+      expect(res.locals.feComponents.jsIncludes).toHaveLength(0)
+    })
   })
 })

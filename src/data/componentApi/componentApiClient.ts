@@ -7,21 +7,24 @@ import TimeoutOptions from '../../types/TimeoutOptions'
 
 export type ComponentsApiResponse<T extends AvailableComponent[]> = Record<T[number], Component>
 
+export type GetComponentsArg = {
+  userToken: string
+  timeoutOptions: TimeoutOptions
+  log: bunyan | typeof console
+  classes?: string
+}
+
 export default {
-  async getComponents<T extends AvailableComponent[]>(
-    userToken: string,
-    timeoutOptions: TimeoutOptions,
-    log: bunyan | typeof console,
-  ): Promise<ComponentsApiResponse<T>> {
+  async getComponents<T extends AvailableComponent[]>(param: GetComponentsArg): Promise<ComponentsApiResponse<T>> {
     const result = await superagent
       .get(`${config.apis.feComponents.url}/api/components`)
       .retry(1, (err, _res) => {
-        if (err) log.info(`Retry handler found API error with ${err.code} ${err.message}`)
+        if (err) param.log.info(`Retry handler found API error with ${err.code} ${err.message}`)
         return undefined // retry handler only for logging retries, not to influence retry logic
       })
       .query('component=header&component=footer')
-      .set({ 'x-user-token': userToken })
-      .timeout(timeoutOptions)
+      .set({ 'x-user-token': param.userToken })
+      .timeout(param.timeoutOptions)
 
     return result.body
   },
