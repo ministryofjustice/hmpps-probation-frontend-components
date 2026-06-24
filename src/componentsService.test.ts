@@ -1,27 +1,14 @@
-import nock from 'nock'
-import * as cheerio from 'cheerio'
 import { Request, Response, NextFunction } from 'express'
 import nunjucks from 'nunjucks'
 import { describe } from 'node:test'
 import getFrontendComponents from './componentsService'
-import config from './config'
-import { HmppsUser, ProbationUser } from './types/HmppsUser'
 import * as UpdateCspModule from './utils/updateCsp'
 import ComponentApiClientModule from './data/componentApi/componentApiClient'
 
-const probationUser = { token: 'token', authSource: 'delius', displayName: 'Edwin Shannon' } as ProbationUser
 const apiResponse = {
   header: { html: 'header', css: ['header.css'], javascript: ['header.js'] },
   footer: { html: 'footer', css: ['footer.css'], javascript: ['footer.js'] },
 }
-
-beforeEach(() => {
-  //
-})
-
-afterEach(() => {
-  jest.resetAllMocks()
-})
 
 nunjucks.configure(
   ['src/assets', 'node_modules/govuk-frontend/dist/', 'node_modules/govuk-frontend/dist/components/'],
@@ -29,6 +16,18 @@ nunjucks.configure(
 )
 
 describe('getFrontendComponents', () => {
+  beforeEach(() => {
+    jest.clearAllMocks() // Clear call histories between tests
+  })
+
+  afterEach(() => {
+    jest.resetAllMocks()
+  })
+
+  afterAll(() => {
+    jest.clearAllMocks() // Clear call histories between tests
+  })
+
   function stubGetComponent(response: any) {
     jest.spyOn(ComponentApiClientModule, 'getComponents').mockResolvedValue(response)
   }
