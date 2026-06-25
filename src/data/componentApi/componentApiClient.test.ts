@@ -29,6 +29,7 @@ jest.mock('superagent', () => {
 })
 
 // needed so that superagent module is mocked up in the Component module
+import superagent from 'superagent' // eslint-disable-line import/first
 import ComponentApiClientModule from './componentApiClient' // eslint-disable-line import/first
 
 describe('getComponents', () => {
@@ -94,17 +95,16 @@ describe('getComponents', () => {
     expect(firstRetryArgument).toEqual(1)
   })
 
-  // it('request using the configured API URL', async () => {
-  //     // Given
-  //     const logger = createLogger()
+  it('request using the configured API URL', async () => {
+    // Given
+    const logger = createLogger()
 
-  //     // When
-  //     await createResponse(logger)
+    // When
+    await createResponse(logger)
 
-  //     // Then
-  //     const providedUrl = mockGet.mock.calls
-  //     expect(providedUrl).toEqual('http://fe-components')
-  // })
+    // Then
+    expect(superagent.get).toHaveBeenCalledWith('http://fe-components/api/components')
+  })
 
   it('sets the value of the timeout setting provided', async () => {
     // Given
