@@ -76,11 +76,7 @@ describe('getFrontendComponents', () => {
   describe('fallbacks', () => {
     describe('when probation user', () => {
       it('should provide a fallback header', async () => {
-        componentsApi
-          .get('/api/components?component=header&component=footer')
-          .reply(500)
-          .get('/api/components?component=header&component=footer')
-          .reply(500)
+        componentsApi.get('/api/components?component=header&component=footer').reply(500)
 
         return request(setupApp())
           .get('/')
@@ -99,11 +95,7 @@ describe('getFrontendComponents', () => {
       })
 
       it('should provide a fallback footer', async () => {
-        componentsApi
-          .get('/api/components?component=header&component=footer')
-          .reply(500)
-          .get('/api/components?component=header&component=footer')
-          .reply(500)
+        componentsApi.get('/api/components?component=header&component=footer').reply(500)
 
         return request(setupApp())
           .get('/')
