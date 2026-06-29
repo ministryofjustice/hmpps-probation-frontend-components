@@ -49,12 +49,12 @@ describe('getFrontendComponents', () => {
   const stubUpdateCsp = () => jest.spyOn(UpdateCspModule, 'default').mockImplementation(jest.fn())
 
   describe('when API client successfully fetches the content', () => {
-    it('request the compnents content from the API clients', async () => {
+    it('request the components content from the API clients', async () => {
       // Given
       const middleware = getFrontendComponents({ pdsUrl: '' })
       stubUpdateCsp()
       const req = {} as Request
-      const res = createResponseObject('hgjgjhgjhg')
+      const res = createResponseObject('phUw9cruyosubane')
       stubGetComponent(apiResponse)
 
       // When
@@ -62,18 +62,18 @@ describe('getFrontendComponents', () => {
 
       // Then
       expect(ComponentApiClientModule.getComponents).toHaveBeenCalledWith({
-        userToken: 'hgjgjhgjhg',
+        userToken: 'phUw9cruyosubane',
         timeoutOptions: { response: 2500, deadline: 2500 },
         log: console,
       })
     })
 
-    it('request the compnents content with the added classes when provided', async () => {
+    it('request the components content with the added classes when provided', async () => {
       // Given
       const middleware = getFrontendComponents({ pdsUrl: '', classes: 'my-classes' })
       stubUpdateCsp()
       const req = {} as Request
-      const res = createResponseObject('hgjgjhgjhg')
+      const res = createResponseObject('phUw9cruyosubane')
       stubGetComponent(apiResponse)
 
       // When
@@ -81,7 +81,7 @@ describe('getFrontendComponents', () => {
 
       // Then
       expect(ComponentApiClientModule.getComponents).toHaveBeenCalledWith({
-        userToken: 'hgjgjhgjhg',
+        userToken: 'phUw9cruyosubane',
         timeoutOptions: { response: 2500, deadline: 2500 },
         log: console,
         classes: 'my-classes',
@@ -93,7 +93,7 @@ describe('getFrontendComponents', () => {
       const middleware = getFrontendComponents({ pdsUrl: '', classes: 'my-classes' })
       stubUpdateCsp()
       const req = {} as Request
-      const res = createResponseObject('hgjgjhgjhg')
+      const res = createResponseObject('phUw9cruyosubane')
       stubGetComponent(apiResponse)
 
       // When
@@ -111,7 +111,7 @@ describe('getFrontendComponents', () => {
       const middleware = getFrontendComponents({ pdsUrl: '' })
       stubUpdateCsp()
       const req = {} as Request
-      const res = createResponseObject('hgjgjhgjhg')
+      const res = createResponseObject('phUw9cruyosubane')
       stubGetComponent(apiResponse)
 
       // When
@@ -130,7 +130,7 @@ describe('getFrontendComponents', () => {
       // Given
       const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true })
       const req = {} as Request
-      const res = createResponseObject('hgjgjhgjhg')
+      const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents')
 
       // When
@@ -144,7 +144,7 @@ describe('getFrontendComponents', () => {
       // Given
       const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true })
       const req = {} as Request
-      const res = createResponseObject('hgjgjhgjhg')
+      const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents')
 
       // When
@@ -155,11 +155,28 @@ describe('getFrontendComponents', () => {
       expect(res.locals.feComponents.header).toContain('probation-common-fallback-header__link')
     })
 
+    it('returns the expected footer component when classes are added to the header', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true, classes: 'my-classes' })
+      const req = {} as Request
+      const res = createResponseObject('phUw9cruyosubane')
+      jest.spyOn(ComponentApiClientModule, 'getComponents')
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(res.locals.feComponents).toBeDefined()
+      expect(res.locals.feComponents.footer).toContain('probation-common-fallback-footer')
+      expect(res.locals.feComponents.cssIncludes).toHaveLength(0)
+      expect(res.locals.feComponents.jsIncludes).toHaveLength(0)
+    })
+
     it('return the content of the footer fallback component', async () => {
       // Given
       const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true })
       const req = {} as Request
-      const res = createResponseObject('hgjgjhgjhg')
+      const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents')
 
       // When
@@ -226,7 +243,7 @@ describe('getFrontendComponents', () => {
       // Given
       const middleware = getFrontendComponents({ pdsUrl: '' })
       const req = {} as Request
-      const res = createResponseObject('hgjgjhgjhg')
+      const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents').mockRejectedValue('some sort of exception')
 
       // When
@@ -241,7 +258,7 @@ describe('getFrontendComponents', () => {
       // Given
       const middleware = getFrontendComponents({ pdsUrl: '' })
       const req = {} as Request
-      const res = createResponseObject('hgjgjhgjhg')
+      const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents').mockRejectedValue('some sort of exception')
 
       // When
