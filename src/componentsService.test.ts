@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import nunjucks from 'nunjucks'
 import { describe } from 'node:test'
+import bunyan from 'bunyan'
 import getFrontendComponents from './componentsService'
 import * as UpdateCspModule from './utils/updateCsp'
 import ComponentApiClientModule from './data/componentApi/componentApiClient'
@@ -44,6 +45,10 @@ describe('getFrontendComponents', () => {
     return {
       locals: {},
     } as any as Response
+  }
+
+  function fakeLogger() {
+    return { error: jest.fn() } as any as bunyan
   }
 
   const stubUpdateCsp = () => jest.spyOn(UpdateCspModule, 'default').mockImplementation(jest.fn())
@@ -241,7 +246,7 @@ describe('getFrontendComponents', () => {
   describe('When getComponents() call throws', () => {
     it('return the content of the header fallback component', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '' })
+      const middleware = getFrontendComponents({ pdsUrl: '', logger: fakeLogger() })
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents').mockRejectedValue('some sort of exception')
@@ -256,7 +261,7 @@ describe('getFrontendComponents', () => {
 
     it('return the content of the footer fallback component', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '' })
+      const middleware = getFrontendComponents({ pdsUrl: '', logger: fakeLogger() })
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents').mockRejectedValue('some sort of exception')
