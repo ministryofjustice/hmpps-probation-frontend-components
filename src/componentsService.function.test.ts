@@ -23,7 +23,7 @@ function setupApp(
   } = { user: probationUser, useFallbacksByDefault: false },
 ): express.Application {
   const app = express()
-  app.use((req, res, next) => {
+  app.use((_req, res, next) => {
     res.locals.user = user
     next()
   })
@@ -123,7 +123,7 @@ describe('getFrontendComponents', () => {
   })
 })
 
-const normaliseHtml = html =>
+const normaliseHtml = (html: string) =>
   html
     .replace(/>\s+</g, '><') // remove inter-tag whitespace
     .trim()

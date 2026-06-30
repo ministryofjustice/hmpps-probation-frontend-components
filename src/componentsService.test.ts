@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express'
 import nunjucks from 'nunjucks'
 import { describe } from 'node:test'
-import bunyan from 'bunyan'
 import getFrontendComponents from './componentsService'
 import * as UpdateCspModule from './utils/updateCsp'
 import ComponentApiClientModule from './data/componentApi/componentApiClient'
+import { fakeLogger } from '../test/helpers/loggerStub'
 
 const apiResponse = {
   header: { html: 'header', css: ['header.css'], javascript: ['header.js'] },
@@ -45,10 +45,6 @@ describe('getFrontendComponents', () => {
     return {
       locals: {},
     } as any as Response
-  }
-
-  function fakeLogger() {
-    return { error: jest.fn() } as any as bunyan
   }
 
   const stubUpdateCsp = () => jest.spyOn(UpdateCspModule, 'default').mockImplementation(jest.fn())
@@ -160,9 +156,9 @@ describe('getFrontendComponents', () => {
       expect(res.locals.feComponents.header).toContain('probation-common-fallback-header__link')
     })
 
-    it('returns the expected footer component when classes are added to the header', async () => {
+    it('return the content of the footer fallback component', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true, classes: 'my-classes' })
+      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true })
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents')
@@ -177,9 +173,26 @@ describe('getFrontendComponents', () => {
       expect(res.locals.feComponents.jsIncludes).toHaveLength(0)
     })
 
-    it('return the content of the footer fallback component', async () => {
+    it('returns the content of the header fallback component when a user defined class is added', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true })
+      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true, classes: 'my-classes' })
+      const req = {} as Request
+      const res = createResponseObject('phUw9cruyosubane')
+      jest.spyOn(ComponentApiClientModule, 'getComponents')
+
+      // When
+      await middleware(req, res, jest.fn() as NextFunction)
+
+      // Then
+      expect(res.locals.feComponents).toBeDefined()
+      expect(res.locals.feComponents.header).toContain('probation-common-fallback-header__link')
+      expect(res.locals.feComponents.header).toContain('my-classes')
+      // expect(res.locals.feComponents.header).toEqual('header')
+    })
+
+    it('returns the content of the footer fallback component when a user defined header class is added', async () => {
+      // Given
+      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true, classes: 'my-classes' })
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents')

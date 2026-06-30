@@ -10,6 +10,7 @@ export function getFallbackHeader(user: HmppsUser | null, requestOptions: Reques
     environmentName,
     user,
     name: initialiseName(user?.displayName),
+    classes: requestOptions.classes,
   })
 }
 
