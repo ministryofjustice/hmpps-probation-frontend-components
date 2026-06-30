@@ -6,6 +6,7 @@ import * as cheerio from 'cheerio'
 import getFrontendComponents from './componentsService'
 import config from './config'
 import { HmppsUser, ProbationUser } from './types/HmppsUser'
+import { fakeLogger } from '../test/helpers/loggerStub'
 
 const probationUser = { token: 'token', authSource: 'delius', displayName: 'Edwin Shannon' } as ProbationUser
 const apiResponse = {
@@ -38,6 +39,7 @@ function setupApp(
     getFrontendComponents({
       pdsUrl: 'http://pdsUrl',
       useFallbacksByDefault,
+      logger: fakeLogger(),
     }),
   )
 
