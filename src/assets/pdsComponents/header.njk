@@ -1,5 +1,5 @@
 {% from "govuk/components/tag/macro.njk" import govukTag %}
-<header class="probation-common-fallback-header govuk-!-display-none-print" role="banner">
+<header class="probation-common-fallback-header govuk-!-display-none-print {% if classes %}{{ classes }}{% endif %}" role="banner">
   <div class="probation-common-fallback-header__container">
     <div class="probation-common-fallback-header__title">
       <a class="probation-common-fallback-header__link probation-common-fallback-header__title__organisation-name" href="#">
