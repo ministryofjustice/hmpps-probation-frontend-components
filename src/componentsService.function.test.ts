@@ -6,6 +6,7 @@ import * as cheerio from 'cheerio'
 import getFrontendComponents from './componentsService'
 import config from './config'
 import { HmppsUser, ProbationUser } from './types/HmppsUser'
+import { fakeLogger } from '../test/helpers/loggerStub'
 
 const probationUser = { token: 'token', authSource: 'delius', displayName: 'Edwin Shannon' } as ProbationUser
 const apiResponse = {
@@ -23,7 +24,7 @@ function setupApp(
   } = { user: probationUser, useFallbacksByDefault: false },
 ): express.Application {
   const app = express()
-  app.use((req, res, next) => {
+  app.use((_req, res, next) => {
     res.locals.user = user
     next()
   })
@@ -38,6 +39,7 @@ function setupApp(
     getFrontendComponents({
       pdsUrl: 'http://pdsUrl',
       useFallbacksByDefault,
+      logger: fakeLogger(),
     }),
   )
 
@@ -76,11 +78,7 @@ describe('getFrontendComponents', () => {
   describe('fallbacks', () => {
     describe('when probation user', () => {
       it('should provide a fallback header', async () => {
-        componentsApi
-          .get('/api/components?component=header&component=footer')
-          .reply(500)
-          .get('/api/components?component=header&component=footer')
-          .reply(500)
+        componentsApi.get('/api/components?component=header&component=footer').reply(500)
 
         return request(setupApp())
           .get('/')
@@ -99,11 +97,7 @@ describe('getFrontendComponents', () => {
       })
 
       it('should provide a fallback footer', async () => {
-        componentsApi
-          .get('/api/components?component=header&component=footer')
-          .reply(500)
-          .get('/api/components?component=header&component=footer')
-          .reply(500)
+        componentsApi.get('/api/components?component=header&component=footer').reply(500)
 
         return request(setupApp())
           .get('/')
@@ -131,7 +125,7 @@ describe('getFrontendComponents', () => {
   })
 })
 
-const normaliseHtml = html =>
+const normaliseHtml = (html: string) =>
   html
     .replace(/>\s+</g, '><') // remove inter-tag whitespace
     .trim()
