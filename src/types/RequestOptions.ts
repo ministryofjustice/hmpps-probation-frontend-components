@@ -7,4 +7,5 @@ export default interface RequestOptions {
   logger?: bunyan | typeof console
   useFallbacksByDefault?: boolean
   timeoutOptions?: TimeoutOptions
+  classes?: string
 }

@@ -1,1 +1,5 @@
 # The Fingerprint of false positive alerts can be added here to be excluded from future scans.
+
+# dummy user tokens for tests:
+src/componentsService.test.ts:generic-api-key:84
+src/componentsService.test.ts:generic-api-key:65

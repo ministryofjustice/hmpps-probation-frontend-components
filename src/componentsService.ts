@@ -12,7 +12,7 @@ const defaultOptions: Partial<RequestOptions> = {
 }
 
 export default function getFrontendComponents(requestOptions?: RequestOptions): RequestHandler {
-  const { logger, timeoutOptions, useFallbacksByDefault } = {
+  const { logger, timeoutOptions, useFallbacksByDefault, classes } = {
     ...defaultOptions,
     ...requestOptions,
   }
@@ -40,7 +40,12 @@ export default function getFrontendComponents(requestOptions?: RequestOptions): 
     }
 
     try {
-      const { header, footer } = await componentApiClient.getComponents(res.locals.user.token, timeoutOptions, logger)
+      const { header, footer } = await componentApiClient.getComponents({
+        userToken: res.locals.user.token!,
+        timeoutOptions: timeoutOptions!,
+        log: logger!,
+        classes,
+      })
 
       res.locals.feComponents = {
         header: header.html,
