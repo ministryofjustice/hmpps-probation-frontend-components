@@ -6,7 +6,7 @@ For any service starting from scratch, they can fork from this project: [hmpps-p
 
 So it has all requirements HMPPS services buth with the header and footer components already configured in.
 
-johan: talk about the client ID
+[Learn more about how to obtain a Client ID](#how-to-obtain-client-id)
 
 ## Adapting an existing project
 
@@ -365,13 +365,13 @@ To do so we need to raise a Pull Request against the [test user file](https://gi
 
 Using this method is the most straight forward but the least flexible. You will not be able to point this setup against a local HMPPS Probation Frontend API instance but it will work against DEV/PREPROD providing that a valid HMPPS Auth client and secret are provided.
 
-Johan: Add a link to the client ID And secret section
+[Learn more about how to obtain a Client ID](#how-to-obtain-client-id)
 
 ## Hybrid approach
 The hybrid approach will allow for services to use fake user along with real developer services so long that they do not share real user ID.
 Note: some real services when loading their dev profile returns fixtures based on fake user IDs.
 
-## How to obtain a client ID
+## <a id="how-to-obtain-client-id"></a>How to obtain a client ID
 By default, services reuse the client ID provided by the [hmpps-template-typescript template](https://github.com/ministryofjustice/hmpps-template-typescript) (hmpps-typescript-template).
 This client ID works well by default, redirecting for http://localhost:3000 and http://localhost:3001/sign-in/callback but is shared with many services so it cannot be modified.
 
