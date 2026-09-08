@@ -6,6 +6,7 @@ const mockQuery = jest.fn().mockReturnThis() // Allows chaining after .query()
 const mockRetry = jest.fn().mockReturnThis() // Allows chaining after .send()
 const mockSend = jest.fn().mockReturnThis() // Allows chaining after .retry()
 const mockTimeout = jest.fn().mockReturnThis() // Allows chaining after .timeout()
+const mockMaxResponseSize = jest.fn().mockReturnThis() // Allows chaining after .maxResponseSize()
 
 jest.mock('superagent', () => {
   const mockChain = {
@@ -15,6 +16,7 @@ jest.mock('superagent', () => {
     retry: mockRetry, // Allows chaining after .send()
     send: mockSend, // Allows chaining after .retry()
     timeout: mockTimeout, // Allows chaining after .timeout()
+    maxResponseSize: mockMaxResponseSize, // Allows chaining after .timeout()
     // Make the chain object awaitable by implementing a custom .then()
     then: jest.fn(resolve => resolve({ body: { id: 42, name: 'Alice' } })),
   }
@@ -115,6 +117,17 @@ describe('getComponents', () => {
 
     // Then
     expect(mockTimeout).toHaveBeenCalledWith({ deadline: 2500, response: 2500 })
+  })
+
+  it('sets the maximum payload size of 50Mb', async () => {
+    // Given
+    const logger = createLogger()
+
+    // When
+    await createResponse(logger)
+
+    // Then
+    expect(mockMaxResponseSize).toHaveBeenCalledWith(52428800)
   })
 
   it('returns the body of the Response', async () => {
