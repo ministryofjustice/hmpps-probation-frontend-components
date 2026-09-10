@@ -10,15 +10,13 @@ So it has all requirements HMPPS services buth with the header and footer compon
 
 ## Adapting an existing project
 
-paragraph about the different type of installation:
+For legacy projects built on old JavaScript project structures, you can integrate the library using without requiring a TypeScript build chain. While newer services benefits from modern [hmpps-template-typescript](https://github.com/ministryofjustice/hmpps-template-typescript) architecture.
+You may select the variant that aligns best with your development workflow and existing infrastructure requirements.
 
-1) project based on existing typescript template
-2) project based on old javascript architecture
+1) [project based on existing typescript template](#implement-on-existing-typescript-project)
+2) [project based on old javascript architecture](#implement-on-existing-legacy-project)
 
-
-### How to implement it for TypeScript-based projects
-
-#### Prerequisites
+### Prerequisites
 
 The package assumes adherance to the standard [hmpps-template-typescript](https://github.com/ministryofjustice/hmpps-template-typescript) project.
 It requires:
@@ -37,7 +35,10 @@ To install the package, run the following command:
 npm install @ministryofjustice/hmpps-probation-frontend-components
 ```
 
-### Usage
+### <a id="implement-on-existing-typescript-project">How to implement it for TypeScript-based projects
+
+
+To implement our components on a Typescipt project, do the following:
 
 Add environment variables to the `helm_deploy/values-{env}.yaml` files for `COMPONENT_API_URL`. Populate with the following values:
 
@@ -68,6 +69,8 @@ Add a block for the component library in the `apis` section of `server/config.ts
 }
 ```
 
+E.G: [See configuration example](https://github.com/ministryofjustice/hmpps-probation-supervision-contacts-ui/blob/550906c1bec807798867bec56b01d427ab19aa09/server/config.ts#L101)
+
 Currently, the package provides the header and the footer component.
 
 To incorporate use the middleware for appropriate routes within your Express application (after the `setUpCurrentUser` middleware):
@@ -82,6 +85,8 @@ To incorporate use the middleware for appropriate routes within your Express app
       logger,
     }))
 ```
+
+E.G: [See configuration example](https://github.com/ministryofjustice/hmpps-tier-ui/blob/91c4682243a20d2912f16bbf2f7c1e0ceaa111fc/server/middleware/setUpFrontendComponents.ts#L4)
 
 **However, please 🙏 consider carefully whether you need the components for EVERY request.**
 
@@ -114,11 +119,15 @@ Add the `hmpps-probation-frontend-components` path to the nunjucksSetup.ts file 
 )
 ```
 
+E.G: [See configuration example](https://github.com/ministryofjustice/hmpps-tier-ui/blob/91c4682243a20d2912f16bbf2f7c1e0ceaa111fc/server/utils/nunjucksSetup.ts#L32}
+
 Include the package scss within the `index.scss` file
 ```scss
   @import 'node_modules/@ministryofjustice/hmpps-probation-frontend-components/dist/assets/footer';
   @import 'node_modules/@ministryofjustice/hmpps-probation-frontend-components/dist/assets/header';
 ```
+
+E.G: [See configuration example](https://github.com/ministryofjustice/hmpps-probation-frontend-component-api/blob/3f602de1880a72cfd90f131503c6abf3ae700f7a/assets/scss/index.scss#L21}
 
 Include reference to the components in your layout.njk file:
 
@@ -142,6 +151,8 @@ Include reference to the components in your layout.njk file:
 {% endblock %}
 ```
 
+E.G: [See configuration example](https://github.com/ministryofjustice/hmpps-tier-ui/blob/91c4682243a20d2912f16bbf2f7c1e0ceaa111fc/server/views/partials/layout.njk}
+
 ### Extra calls
 
 It may be that you need to add some extra requests for the page components for pages that do not fit the normal flow
@@ -150,7 +161,7 @@ of routes. e.g. in `setUpAuthentication.ts` on the `/autherror` path:
 ```javascript
       router.get(
        '/autherror',
-       pdsComponents.getPageComponents({ pdsUrl: config.serviceUrls.digitalProbation }),
+       pdsComponents.getPageComponents({ pdsUrl: config.apis.probationApi.url }),
        (req, res) => {
          res.status(401)
          return res.render('autherror')
@@ -160,7 +171,78 @@ of routes. e.g. in `setUpAuthentication.ts` on the `/autherror` path:
 
 This will provide a stripped down header if there is no user object on `res.locals`.
 
-### How to implement it for Javascript-based older projects
+### <a id="implement-on-existing-legacy-project">How to implement it for Javascript-based older projects
+
+There are a few old services that pre-date the era the typescript template was created and pragmatically, the decision was take not to upgrade them and bringing the components into such services is therefore slightly different.
+
+To implement our components on a Typescipt project, do the following:
+
+Add environment variables to the `helm_deploy/values-{env}.yaml` files for `COMPONENT_API_URL`. Populate with the following values:
+
+local - http://localhost:3001 - Only if you have an instance of the HMPPS Probation frontend API running on the same machine, otherwise favour the dev environment locally
+
+dev - https://probation-frontend-components-dev.hmpps.service.justice.gov.uk
+
+preprod - https://probation-frontend-components-preprod.hmpps.service.justice.gov.uk
+
+prod - https://probation-frontend-components.hmpps.service.justice.gov.uk
+
+You can also add this to your `.env` or `docker-compose` files with the dev url, as follows:
+
+```
+- COMPONENT_API_URL=https://probation-frontend-components-dev.hmpps.service.justice.gov.uk
+```
+
+Add a block for the component library in the `apis` section of `config.js`, for example:
+
+```javascript
+  apis: {
+    [...]
+    probationApi: {
+      url: get('COMPONENT_API_URL', 'https://probation-frontend-components-dev.hmpps.service.justice.gov.uk', requiredInProduction),
+      healthPath: '/health/ping'
+    }
+    [...]
+}
+```
+
+E.G: [See configuration example](https://github.com/ministryofjustice/wmt-web/blob/43c3d612a44c04a8cc6ab2e2fa8eb917244c8929/config.js#L107}
+
+In the main Application scrtipt (usually app.js), import the library in a CommonJs-compatible way.
+
+```javascript
+const pdsComponents = require('@ministryofjustice/hmpps-probation-frontend-components').default
+```
+
+E.G: [See configuration example](https://github.com/ministryofjustice/wmt-web/blob/49628fd367be40c4323ddb1c8809dd41060865de/app/app.js#L20)
+
+In the same script, bootstrap the PDS component library using the URL set in configuration earlier.
+
+```javascript
+  app.use(pdsComponents.getPageComponents({
+    pdsUrl: config.apis.probationApi.url,
+    logger
+  }))
+```
+E.G: [See configuration example](https://github.com/ministryofjustice/wmt-web/blob/49628fd367be40c4323ddb1c8809dd41060865de/app/app.js#L46-L49)
+
+
+Add the JS and CSS imports in the head section of the layout
+
+```javascript
+  {% block head %}
+      {% include "includes/head.njk" %}
+      {% for js in feComponents.jsIncludes %}
+          <script src="{{ js }}" nonce="{{ cspNonce }}"></script>
+      {% endfor %}
+
+      {% for css in feComponents.cssIncludes %}
+          <link href="{{ css }}" nonce="{{ cspNonce }}" rel="stylesheet" />
+      {% endfor %}
+  {% endblock %}
+```
+
+E.G: [See configuration example](https://github.com/ministryofjustice/wmt-web/blob/43c3d612a44c04a8cc6ab2e2fa8eb917244c8929/app/views/includes/layout.njk#L8)
 
 ### CSP
 
@@ -173,6 +255,10 @@ E.G: [See configuration example](https://github.com/ministryofjustice/hmpps-prob
 In the event of a failure to retrieve the components, the package will populate the html fields with fallback components.
 
 The fall back component for the header will render a banner which show the logged in user's details with links to signout and profile but will not be able to render any menu links as it will not be able to check user's credentials whereas the fallback footer component will render an empty element as none of the links will be available.
+
+## Why do we need HMPPS Auth in this project?
+
+HMPPS Auth is the centralized OAuth2 authentication and authorization API server used by His Majesty’s Prison and Probation Service. It serves as the secure identity gateway that regulates access across all HMPPS internal digital environments.
 
 ## Using wiremock with HMPPS Auth
 
