@@ -31,6 +31,7 @@ export default {
       .query(generateQueryParams(param))
       .set({ 'x-user-token': param.userToken })
       .timeout(param.timeoutOptions)
+      .maxResponseSize(50 * 1024 * 1024)
 
     return result.body
   },
