@@ -5,7 +5,6 @@ import getFrontendComponents from './componentsService'
 import * as UpdateCspModule from './utils/updateCsp'
 import ComponentApiClientModule from './data/componentApi/componentApiClient'
 import { fakeLogger } from '../test/helpers/loggerStub'
-import { sanitizeComponentHtml } from './utils/sanitizeHtml'
 
 const apiResponse = {
   header: { html: 'header', css: ['header.css'], javascript: ['header.js'] },
