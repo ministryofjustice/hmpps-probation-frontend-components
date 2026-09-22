@@ -80,6 +80,7 @@
     "@types/bunyan": "^1.8.11",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
+    "@types/sanitize-html": "^2.16.1",
     "@types/superagent": "^8.1.9",
     "@types/supertest": "^7.2.0",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
@@ -97,9 +98,11 @@
     "ts-jest": "^29.3.4"
   },
   "dependencies": {
+    "@ministryofjustice/hmpps-probation-frontend-components": "^1.1.1",
     "@types/node": "22.20.2",
     "@types/nunjucks": "^3.2.6",
     "nunjucks": "^3.2.4",
+    "sanitize-html": "2.17.1",
     "superagent": "^9.0.2"
   },
   "overrides": {

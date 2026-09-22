@@ -4,6 +4,7 @@ import { getFallbackFooter, getFallbackHeader } from './utils/fallbacks'
 import RequestOptions from './types/RequestOptions'
 import updateCsp from './utils/updateCsp'
 import { HmppsUser } from './types/HmppsUser'
+import { sanitizeComponentHtml } from './utils/sanitizeHtml'
 
 const defaultOptions: Partial<RequestOptions> = {
   logger: console,
@@ -48,8 +49,8 @@ export default function getFrontendComponents(requestOptions?: RequestOptions): 
       })
 
       res.locals.feComponents = {
-        header: header.html,
-        footer: footer.html,
+        header: sanitizeComponentHtml(header.html),
+        footer: sanitizeComponentHtml(footer.html),
         cssIncludes: [...header.css, ...footer.css],
         jsIncludes: [...header.javascript, ...footer.javascript],
       }
