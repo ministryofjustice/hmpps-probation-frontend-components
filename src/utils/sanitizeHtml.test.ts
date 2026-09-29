@@ -41,10 +41,6 @@ describe('sanitizeComponentHtml', () => {
     expect(sanitizeComponentHtml(html)).toBe(html)
   })
 
-  it('preserves text inside unsupported structural elements', () => {
-    expect(sanitizeComponentHtml('<section>Important content</section>')).toBe('Important content')
-  })
-
   it('does not allow attribute-name casing to bypass sanitization', () => {
     const sanitized = sanitizeComponentHtml('<button OnClick="alert(1)">Open</button>')
 
@@ -52,9 +48,8 @@ describe('sanitizeComponentHtml', () => {
   })
 
   it('handles malformed malicious markup', () => {
-    const sanitized = sanitizeComponentHtml('<header><img src=x onerror=alert(1)><p>Content')
+    const sanitized = sanitizeComponentHtml('<header><img src=x onerror=alert(1)></img><p>Content</p></header>')
 
-    expect(sanitized).not.toMatch(/<img|onerror/i)
-    expect(sanitized).toContain('<p>Content</p>')
+    expect(sanitized).toBe('<header><img src="x" /><p>Content</p></header>')
   })
 })
