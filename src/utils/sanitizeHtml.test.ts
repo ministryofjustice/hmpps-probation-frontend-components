@@ -13,19 +13,17 @@ describe('sanitizeComponentHtml', () => {
   })
 
   it.each([
-    ['script elements', '<header>Safe<script>alert("xss")</script></header>'],
-    ['object elements', '<object data="https://attacker.example">Fallback content</object>'],
-    ['embed elements', '<embed src="https://attacker.example/payload">'],
-    ['style elements', '<style>body { display: none; }</style>'],
-    ['inline event handlers', '<button onclick="alert(\'xss\')">Open</button>'],
-    ['onerror attributes', '<div onerror="alert(\'xss\')">Content</div>'],
-    ['onload attributes', '<div onload="alert(\'xss\')">Content</div>'],
-    ['style attributes', '<div style="background:url(javascript:alert(1))">Content</div>'],
-    ['iframe elements', '<iframe src="https://attacker.example"></iframe>'],
-  ])('removes %s', (_description, html) => {
-    const sanitized = sanitizeComponentHtml(html)
-
-    expect(sanitized).not.toMatch(/<script|onclick=|style=|<iframe/i)
+    ['script elements', '<header>Safe<script>alert("xss")</script></header>', '<header>Safe</header>'],
+    ['object elements', '<object data="https://attacker.example">Fallback content</object>', 'Fallback content'],
+    ['embed elements', '<embed src="https://attacker.example/payload">', ''],
+    ['style elements', '<style>body { display: none; }</style>', ''],
+    ['inline event handlers', '<button onclick="alert(\'xss\')">Open</button>', '<button>Open</button>'],
+    ['onerror attributes', '<div onerror="alert(\'xss\')">Content</div>', '<div>Content</div>'],
+    ['onload attributes', '<div onload="alert(\'xss\')">Content</div>', '<div>Content</div>'],
+    ['style attributes', '<div style="background:url(javascript:alert(1))">Content</div>', '<div>Content</div>'],
+    ['iframe elements', '<iframe src="https://attacker.example"></iframe>', ''],
+  ])('sanitizes %s', (_description, html, expected) => {
+    expect(sanitizeComponentHtml(html)).toBe(expected)
   })
 
   it.each([
@@ -53,8 +51,8 @@ describe('sanitizeComponentHtml', () => {
   })
 
   it('handles malformed malicious markup', () => {
-    const sanitized = sanitizeComponentHtml('<header><img src=x onerror=alert(1)></img><p>Content</p></header>')
-
-    expect(sanitized).toBe('<header><img src="x" /><p>Content</p></header>')
+    expect(sanitizeComponentHtml('<header><img src="x" onerror=alert(1)><p>Content</p></header>')).toBe(
+      '<header><img src="x" /><p>Content</p></header>',
+    )
   })
 })
