@@ -14,7 +14,12 @@ describe('sanitizeComponentHtml', () => {
 
   it.each([
     ['script elements', '<header>Safe<script>alert("xss")</script></header>'],
+    ['object elements', '<object data="https://attacker.example">Fallback content</object>'],
+    ['embed elements', '<embed src="https://attacker.example/payload">'],
+    ['style elements', '<style>body { display: none; }</style>'],
     ['inline event handlers', '<button onclick="alert(\'xss\')">Open</button>'],
+    ['onerror attributes', '<div onerror="alert(\'xss\')">Content</div>'],
+    ['onload attributes', '<div onload="alert(\'xss\')">Content</div>'],
     ['style attributes', '<div style="background:url(javascript:alert(1))">Content</div>'],
     ['iframe elements', '<iframe src="https://attacker.example"></iframe>'],
   ])('removes %s', (_description, html) => {
