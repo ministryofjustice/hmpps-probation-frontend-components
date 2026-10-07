@@ -30,13 +30,16 @@
   },
   "jest": {
     "transform": {
-      "^.+\\.tsx?$": [
+      "^.+\\.[tj]sx?$": [
         "ts-jest",
         {
           "isolatedModules": true
         }
       ]
     },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!sanitize-html/|htmlparser2/|domhandler/|domutils/|domelementtype/|dom-serializer/|entities/)"
+    ],
     "testMatch": [
       "<rootDir>/**/**/?(*.)(cy|test).{ts,js,jsx,mjs}"
     ],
@@ -99,10 +102,10 @@
   },
   "dependencies": {
     "@ministryofjustice/hmpps-probation-frontend-components": "^1.1.1",
-    "@types/node": "22.20.4",
+    "@types/node": "22.20.5",
     "@types/nunjucks": "^3.2.6",
     "nunjucks": "^3.2.4",
-    "sanitize-html": "2.17.5",
+    "sanitize-html": "2.18.0",
     "superagent": "^10.4.1"
   },
   "overrides": {
