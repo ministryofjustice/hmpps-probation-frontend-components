@@ -4,7 +4,7 @@ import { describe } from 'node:test'
 import getFrontendComponents from './componentsService'
 import * as UpdateCspModule from './utils/updateCsp'
 import ComponentApiClientModule from './data/componentApi/componentApiClient'
-import { fakeLogger } from '../test/helpers/loggerStub'
+import { fakeLogger, FakeLogger } from '../test/helpers/loggerStub'
 
 const apiResponse = {
   header: { html: 'header', css: ['header.css'], javascript: ['header.js'] },
@@ -17,8 +17,11 @@ nunjucks.configure(
 )
 
 describe('getFrontendComponents', () => {
+  let logger: FakeLogger
+
   beforeEach(() => {
-    jest.clearAllMocks() // Clear call histories between tests
+    jest.clearAllMocks()
+    logger = fakeLogger()
   })
 
   afterEach(() => {
@@ -26,7 +29,7 @@ describe('getFrontendComponents', () => {
   })
 
   afterAll(() => {
-    jest.clearAllMocks() // Clear call histories between tests
+    jest.clearAllMocks()
   })
 
   function stubGetComponent(response: any) {
@@ -52,7 +55,7 @@ describe('getFrontendComponents', () => {
   describe('when API client successfully fetches the content', () => {
     it('request the components content from the API clients', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '' })
+      const middleware = getFrontendComponents({ pdsUrl: '', logger })
       stubUpdateCsp()
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
@@ -65,13 +68,15 @@ describe('getFrontendComponents', () => {
       expect(ComponentApiClientModule.getComponents).toHaveBeenCalledWith({
         userToken: 'phUw9cruyosubane',
         timeoutOptions: { response: 2500, deadline: 2500 },
-        log: console,
+        log: logger,
       })
+      expect(logger.info).not.toHaveBeenCalled()
+      expect(logger.error).not.toHaveBeenCalled()
     })
 
     it('request the components content with the added classes when provided', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '', classes: 'my-classes' })
+      const middleware = getFrontendComponents({ pdsUrl: '', classes: 'my-classes', logger })
       stubUpdateCsp()
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
@@ -84,14 +89,14 @@ describe('getFrontendComponents', () => {
       expect(ComponentApiClientModule.getComponents).toHaveBeenCalledWith({
         userToken: 'phUw9cruyosubane',
         timeoutOptions: { response: 2500, deadline: 2500 },
-        log: console,
+        log: logger,
         classes: 'my-classes',
       })
     })
 
     it('sets the header component content from the API response in the response object', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '', classes: 'my-classes' })
+      const middleware = getFrontendComponents({ pdsUrl: '', classes: 'my-classes', logger })
       stubUpdateCsp()
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
@@ -109,7 +114,7 @@ describe('getFrontendComponents', () => {
 
     it('sets the footer component content from the API response in the response object', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '' })
+      const middleware = getFrontendComponents({ pdsUrl: '', logger })
       stubUpdateCsp()
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
@@ -129,7 +134,7 @@ describe('getFrontendComponents', () => {
   describe('When fallback is requested', () => {
     it('must not call getComponents()', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true })
+      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true, logger })
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents')
@@ -139,11 +144,12 @@ describe('getFrontendComponents', () => {
 
       // Then
       expect(ComponentApiClientModule.getComponents).not.toHaveBeenCalled()
+      expect(logger.info).toHaveBeenCalledWith('Using fallback frontend components by default')
     })
 
     it('return the content of the header fallback component', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true })
+      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true, logger })
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents')
@@ -158,7 +164,7 @@ describe('getFrontendComponents', () => {
 
     it('return the content of the footer fallback component', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true })
+      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true, logger })
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents')
@@ -175,7 +181,12 @@ describe('getFrontendComponents', () => {
 
     it('returns the content of the header fallback component when a user defined class is added', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true, classes: 'my-classes' })
+      const middleware = getFrontendComponents({
+        pdsUrl: '',
+        useFallbacksByDefault: true,
+        classes: 'my-classes',
+        logger,
+      })
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents')
@@ -187,12 +198,16 @@ describe('getFrontendComponents', () => {
       expect(res.locals.feComponents).toBeDefined()
       expect(res.locals.feComponents.header).toContain('probation-common-fallback-header__link')
       expect(res.locals.feComponents.header).toContain('my-classes')
-      // expect(res.locals.feComponents.header).toEqual('header')
     })
 
     it('returns the content of the footer fallback component when a user defined header class is added', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '', useFallbacksByDefault: true, classes: 'my-classes' })
+      const middleware = getFrontendComponents({
+        pdsUrl: '',
+        useFallbacksByDefault: true,
+        classes: 'my-classes',
+        logger,
+      })
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
       jest.spyOn(ComponentApiClientModule, 'getComponents')
@@ -211,7 +226,7 @@ describe('getFrontendComponents', () => {
   describe('when no user token is provided', () => {
     it('must not call getComponents()', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '' })
+      const middleware = getFrontendComponents({ pdsUrl: '', logger })
       const req = {} as Request
       const res = createResponseObjectWithNoUser()
       jest.spyOn(ComponentApiClientModule, 'getComponents')
@@ -221,11 +236,12 @@ describe('getFrontendComponents', () => {
 
       // Then
       expect(ComponentApiClientModule.getComponents).not.toHaveBeenCalled()
+      expect(logger.info).toHaveBeenCalledWith('Using fallback frontend components when no user in context')
     })
 
     it('return the content of the header fallback component', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '' })
+      const middleware = getFrontendComponents({ pdsUrl: '', logger })
       const req = {} as Request
       const res = createResponseObjectWithNoUser()
       jest.spyOn(ComponentApiClientModule, 'getComponents')
@@ -240,7 +256,7 @@ describe('getFrontendComponents', () => {
 
     it('return the content of the footer fallback component', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '' })
+      const middleware = getFrontendComponents({ pdsUrl: '', logger })
       const req = {} as Request
       const res = createResponseObjectWithNoUser()
       jest.spyOn(ComponentApiClientModule, 'getComponents')
@@ -257,12 +273,14 @@ describe('getFrontendComponents', () => {
   })
 
   describe('When getComponents() call throws', () => {
+    const apiError = new Error('some sort of exception')
+
     it('return the content of the header fallback component', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '', logger: fakeLogger() })
+      const middleware = getFrontendComponents({ pdsUrl: '', logger })
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
-      jest.spyOn(ComponentApiClientModule, 'getComponents').mockRejectedValue('some sort of exception')
+      jest.spyOn(ComponentApiClientModule, 'getComponents').mockRejectedValue(apiError)
 
       // When
       await middleware(req, res, jest.fn() as NextFunction)
@@ -270,14 +288,15 @@ describe('getFrontendComponents', () => {
       // Then
       expect(res.locals.feComponents).toBeDefined()
       expect(res.locals.feComponents.header).toContain('probation-common-fallback-header__link')
+      expect(logger.error).toHaveBeenCalledWith(apiError, 'Failed to retrieve front end components, using fallbacks')
     })
 
     it('return the content of the footer fallback component', async () => {
       // Given
-      const middleware = getFrontendComponents({ pdsUrl: '', logger: fakeLogger() })
+      const middleware = getFrontendComponents({ pdsUrl: '', logger })
       const req = {} as Request
       const res = createResponseObject('phUw9cruyosubane')
-      jest.spyOn(ComponentApiClientModule, 'getComponents').mockRejectedValue('some sort of exception')
+      jest.spyOn(ComponentApiClientModule, 'getComponents').mockRejectedValue(apiError)
 
       // When
       await middleware(req, res, jest.fn() as NextFunction)
@@ -287,6 +306,7 @@ describe('getFrontendComponents', () => {
       expect(res.locals.feComponents.footer).toContain('probation-common-fallback-footer')
       expect(res.locals.feComponents.cssIncludes).toHaveLength(0)
       expect(res.locals.feComponents.jsIncludes).toHaveLength(0)
+      expect(logger.error).toHaveBeenCalledWith(apiError, 'Failed to retrieve front end components, using fallbacks')
     })
   })
 })

@@ -161,7 +161,10 @@ of routes. e.g. in `setUpAuthentication.ts` on the `/autherror` path:
 ```javascript
       router.get(
        '/autherror',
-       pdsComponents.getPageComponents({ pdsUrl: config.apis.probationApi.url }),
+       pdsComponents.getPageComponents({
+         pdsUrl: config.apis.probationApi.url,
+         logger,
+       }),
        (req, res) => {
          res.status(401)
          return res.render('autherror')
@@ -169,7 +172,7 @@ of routes. e.g. in `setUpAuthentication.ts` on the `/autherror` path:
       )
 ```
 
-This will provide a stripped down header if there is no user object on `res.locals`.
+This will provide a stripped down header if there is no user object on `res.locals`. Always pass the service `logger` so that fallback messages are captured in your application logs rather than only written to `console`.
 
 ### <a id="implement-on-existing-legacy-project">How to implement it for Javascript-based older projects
 
