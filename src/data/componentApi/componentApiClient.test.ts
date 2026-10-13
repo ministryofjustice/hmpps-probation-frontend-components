@@ -140,4 +140,30 @@ describe('getComponents', () => {
     // Then
     expect(response).toEqual({ id: 42, name: 'Alice' })
   })
+
+  it('logs when the retry handler finds an API error', async () => {
+    // Given
+    const logger = createLogger()
+
+    // When
+    await createResponse(logger)
+    const retryHandler = mockRetry.mock.calls[0][1] as (err: { code: string; message: string } | null) => undefined
+    retryHandler({ code: 'ECONNRESET', message: 'socket hang up' })
+
+    // Then
+    expect(logger.info).toHaveBeenCalledWith('Retry handler found API error with ECONNRESET socket hang up')
+  })
+
+  it('does not log when the retry handler is called without an error', async () => {
+    // Given
+    const logger = createLogger()
+
+    // When
+    await createResponse(logger)
+    const retryHandler = mockRetry.mock.calls[0][1] as (err: { code: string; message: string } | null) => undefined
+    retryHandler(null)
+
+    // Then
+    expect(logger.info).not.toHaveBeenCalled()
+  })
 })

@@ -6,7 +6,7 @@ import * as cheerio from 'cheerio'
 import getFrontendComponents from './componentsService'
 import config from './config'
 import { HmppsUser, ProbationUser } from './types/HmppsUser'
-import { fakeLogger } from '../test/helpers/loggerStub'
+import { fakeLogger, FakeLogger } from '../test/helpers/loggerStub'
 
 const probationUser = { token: 'token', authSource: 'delius', displayName: 'Edwin Shannon' } as ProbationUser
 const apiResponse = {
@@ -15,17 +15,16 @@ const apiResponse = {
 }
 
 function setupApp(
-  {
-    user,
-    useFallbacksByDefault,
-  }: {
-    user?: HmppsUser
+  options: {
+    user?: HmppsUser | null
     useFallbacksByDefault?: boolean
-  } = { user: probationUser, useFallbacksByDefault: false },
-): express.Application {
+    logger?: FakeLogger
+  } = {},
+): { app: express.Application; logger: FakeLogger } {
+  const { user = probationUser, useFallbacksByDefault = false, logger = fakeLogger() } = options
   const app = express()
   app.use((_req, res, next) => {
-    res.locals.user = user
+    res.locals.user = user ?? undefined
     next()
   })
 
@@ -39,13 +38,13 @@ function setupApp(
     getFrontendComponents({
       pdsUrl: 'http://pdsUrl',
       useFallbacksByDefault,
-      logger: fakeLogger(),
+      logger,
     }),
   )
 
   app.get('/', (_req, res) => res.send({ feComponents: res.locals.feComponents }))
 
-  return app
+  return { app, logger }
 }
 
 let componentsApi: nock.Scope
@@ -61,8 +60,9 @@ afterEach(() => {
 describe('getFrontendComponents', () => {
   it('should call fe components api and attach header and footer html with all css and js combined', async () => {
     componentsApi.get('/api/components?component=header&component=footer').reply(200, apiResponse)
+    const { app, logger } = setupApp()
 
-    return request(setupApp())
+    return request(app)
       .get('/')
       .expect('Content-Type', /json/)
       .expect(200, {
@@ -73,14 +73,19 @@ describe('getFrontendComponents', () => {
           jsIncludes: ['header.js', 'footer.js'],
         },
       })
+      .expect(() => {
+        expect(logger.error).not.toHaveBeenCalled()
+        expect(logger.info).not.toHaveBeenCalled()
+      })
   })
 
   describe('fallbacks', () => {
     describe('when probation user', () => {
       it('should provide a fallback header', async () => {
         componentsApi.get('/api/components?component=header&component=footer').reply(500)
+        const { app, logger } = setupApp()
 
-        return request(setupApp())
+        return request(app)
           .get('/')
           .expect('Content-Type', /json/)
           .expect(200)
@@ -93,13 +98,18 @@ describe('getFrontendComponents', () => {
 
             expect(res.body.feComponents.cssIncludes).toEqual([])
             expect(res.body.feComponents.jsIncludes).toEqual([])
+            expect(logger.error).toHaveBeenCalledWith(
+              expect.anything(),
+              'Failed to retrieve front end components, using fallbacks',
+            )
           })
       })
 
       it('should provide a fallback footer', async () => {
         componentsApi.get('/api/components?component=header&component=footer').reply(500)
+        const { app, logger } = setupApp()
 
-        return request(setupApp())
+        return request(app)
           .get('/')
           .expect('Content-Type', /json/)
           .expect(200)
@@ -119,6 +129,38 @@ describe('getFrontendComponents', () => {
 
             expect(res.body.feComponents.cssIncludes).toEqual([])
             expect(res.body.feComponents.jsIncludes).toEqual([])
+            expect(logger.error).toHaveBeenCalledWith(
+              expect.anything(),
+              'Failed to retrieve front end components, using fallbacks',
+            )
+          })
+      })
+    })
+
+    describe('when no user in context', () => {
+      it('should log that fallbacks are used because there is no user', async () => {
+        const { app, logger } = setupApp({ user: null })
+
+        return request(app)
+          .get('/')
+          .expect(200)
+          .expect(() => {
+            expect(logger.info).toHaveBeenCalledWith('Using fallback frontend components when no user in context')
+            expect(logger.error).not.toHaveBeenCalled()
+          })
+      })
+    })
+
+    describe('when useFallbacksByDefault is true', () => {
+      it('should log that fallbacks are used by default', async () => {
+        const { app, logger } = setupApp({ useFallbacksByDefault: true })
+
+        return request(app)
+          .get('/')
+          .expect(200)
+          .expect(() => {
+            expect(logger.info).toHaveBeenCalledWith('Using fallback frontend components by default')
+            expect(logger.error).not.toHaveBeenCalled()
           })
       })
     })
