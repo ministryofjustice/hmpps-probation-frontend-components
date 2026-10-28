@@ -1,3 +1,4 @@
+import * as fs from 'node:fs'
 import { sanitizeComponentHtml } from './sanitizeHtml'
 
 describe('sanitizeComponentHtml', () => {
@@ -36,6 +37,16 @@ describe('sanitizeComponentHtml', () => {
     const sanitized = sanitizeComponentHtml(`<a href="${href}">Open link</a>`)
 
     expect(sanitized).toBe('<a>Open link</a>')
+  })
+
+  it('must allow the crest or SVG to go in with its attributes', () => {
+    const originalHTML = fs.readFileSync('test/fixture/rawHeader.txt', 'utf8')
+    const sanitize = sanitizeComponentHtml(originalHTML)
+
+    expect(sanitize).toContain('<svg')
+    expect(sanitize).toContain('<path')
+    expect(sanitize).toContain('d=')
+    expect(sanitize).toContain('xmlns=')
   })
 
   it('allows HTTPS links', () => {
