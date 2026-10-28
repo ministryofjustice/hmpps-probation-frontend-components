@@ -83,6 +83,7 @@
     "@types/bunyan": "^1.8.11",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
+    "@types/node": "26.6.5",
     "@types/sanitize-html": "^2.16.1",
     "@types/superagent": "^8.1.9",
     "@types/supertest": "^7.2.0",
@@ -102,7 +103,6 @@
   },
   "dependencies": {
     "@ministryofjustice/hmpps-probation-frontend-components": "^1.1.1",
-    "@types/node": "22.20.5",
     "@types/nunjucks": "^3.2.6",
     "nunjucks": "^3.2.4",
     "sanitize-html": "2.18.1",
