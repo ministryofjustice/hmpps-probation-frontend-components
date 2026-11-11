@@ -66,6 +66,7 @@ const componentHtmlOptions: sanitizeHtml.IOptions = {
     ],
   },
   allowedSchemes: ['https'],
+  allowedSchemesAppliedToAttributes: ['href', 'src', 'cite', 'xlink:href'],
   allowProtocolRelative: false,
   disallowedTagsMode: 'discard',
   enforceHtmlBoundary: true,
