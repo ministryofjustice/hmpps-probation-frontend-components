@@ -116,7 +116,7 @@ describe('getFrontendComponents', () => {
           .expect(res => {
             expect(normaliseHtml(res.body.feComponents.footer)).toEqual(
               normaliseHtml(
-                '<footer class="probation-common-fallback-footer govuk-!-display-none-print" role="contentinfo">' +
+                '<footer class="probation-common-fallback-footer govuk-!-display-none-print">' +
                   '<div class="govuk-width-container">' +
                   '<div class="govuk-grid-row">' +
                   '<div class="govuk-grid-column-full">' +
