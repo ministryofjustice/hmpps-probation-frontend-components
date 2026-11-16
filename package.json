@@ -80,6 +80,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "26.6.5",
     "@types/sanitize-html": "^2.16.1",
+    "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.72.2",
     "cheerio": "^1.0.0",
     "eslint-import-resolver-typescript": "^4.4.4",
@@ -96,6 +97,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@ministryofjustice/hmpps-probation-frontend-components": "^1.1.1",
     "@ministryofjustice/hmpps-rest-client": "2.2.0",
     "@types/nunjucks": "^3.2.6",
     "nunjucks": "^3.2.4",

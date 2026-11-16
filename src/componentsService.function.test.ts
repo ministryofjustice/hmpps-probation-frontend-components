@@ -55,11 +55,16 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.resetAllMocks()
+  nock.cleanAll()
 })
 
 describe('getFrontendComponents', () => {
   it('should call fe components api and attach header and footer html with all css and js combined', async () => {
-    componentsApi.get('/api/components?component=header&component=footer').reply(200, apiResponse)
+    componentsApi
+      .get('/api/components')
+      .query({ component: ['header', 'footer'] })
+      .matchHeader('x-user-token', 'token')
+      .reply(200, apiResponse)
     const { app, logger } = setupApp()
 
     return request(app)
@@ -82,7 +87,12 @@ describe('getFrontendComponents', () => {
   describe('fallbacks', () => {
     describe('when probation user', () => {
       it('should provide a fallback header', async () => {
-        componentsApi.get('/api/components?component=header&component=footer').reply(500)
+        // Initial request + one retry both fail with 500
+        componentsApi
+          .get('/api/components')
+          .query({ component: ['header', 'footer'] })
+          .times(2)
+          .reply(500)
         const { app, logger } = setupApp()
 
         return request(app)
@@ -106,7 +116,12 @@ describe('getFrontendComponents', () => {
       })
 
       it('should provide a fallback footer', async () => {
-        componentsApi.get('/api/components?component=header&component=footer').reply(500)
+        // Initial request + one retry both fail with 500
+        componentsApi
+          .get('/api/components')
+          .query({ component: ['header', 'footer'] })
+          .times(2)
+          .reply(500)
         const { app, logger } = setupApp()
 
         return request(app)
