@@ -1,17 +1,17 @@
-import bunyan from 'bunyan'
+import type Logger from '../../src/types/Logger'
 
 export type FakeLogger = {
-  info: jest.Mock
-  error: jest.Mock
-  warn: jest.Mock
-  debug: jest.Mock
+  info: jest.MockedFunction<Logger['info']>
+  error: jest.MockedFunction<Logger['error']>
+  warn: jest.MockedFunction<Logger['warn']>
+  debug: jest.MockedFunction<Logger['debug']>
 }
 
-export function fakeLogger(): FakeLogger & bunyan {
+export function fakeLogger(): FakeLogger {
   return {
     info: jest.fn(),
     error: jest.fn(),
     warn: jest.fn(),
     debug: jest.fn(),
-  } as FakeLogger & bunyan
+  }
 }

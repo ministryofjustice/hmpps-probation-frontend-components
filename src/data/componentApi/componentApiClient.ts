@@ -3,6 +3,7 @@ import type bunyan from 'bunyan'
 import AvailableComponent from '../../types/AvailableComponent'
 import config from '../../config'
 import Component from '../../types/Component'
+import Logger from '../../types/Logger'
 import TimeoutOptions from '../../types/TimeoutOptions'
 
 export type ComponentsApiResponse<T extends AvailableComponent[]> = Record<T[number], Component>
@@ -10,7 +11,7 @@ export type ComponentsApiResponse<T extends AvailableComponent[]> = Record<T[num
 export type GetComponentsArg = {
   userToken: string
   timeoutOptions: TimeoutOptions
-  log: bunyan | typeof console
+  log: Logger
   classes?: string
 }
 
@@ -21,7 +22,7 @@ function generateQueryParams(param: GetComponentsArg): string {
 }
 
 class ComponentApiClient extends RestClient {
-  constructor(logger: bunyan | typeof console, timeout: TimeoutOptions) {
+  constructor(logger: Logger, timeout: TimeoutOptions) {
     super(
       'HMPPS Probation Frontend Components API',
       {
@@ -29,7 +30,8 @@ class ComponentApiClient extends RestClient {
         timeout,
         agent: new AgentConfig(timeout.response),
       },
-      logger,
+      // RestClient expects bunyan.Logger | Console; our Logger is structurally compatible
+      logger as bunyan | Console,
     )
   }
 

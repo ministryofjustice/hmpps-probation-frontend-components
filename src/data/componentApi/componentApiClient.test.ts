@@ -1,7 +1,7 @@
 import nock from 'nock'
-import type bunyan from 'bunyan'
 import ComponentApiClientModule from './componentApiClient'
 import config from '../../config'
+import { fakeLogger, FakeLogger } from '../../../test/helpers/loggerStub'
 
 describe('getComponents', () => {
   const api = () => nock(config.apis.feComponents.url)
@@ -14,15 +14,11 @@ describe('getComponents', () => {
     nock.cleanAll()
   })
 
-  const createLogger = () =>
-    ({
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      debug: jest.fn(),
-    }) as unknown as bunyan
-
-  const createResponse = async (log: bunyan, userclass?: string, timeoutOptions = { response: 2500, deadline: 2500 }) =>
+  const createResponse = async (
+    log: FakeLogger,
+    userclass?: string,
+    timeoutOptions = { response: 2500, deadline: 2500 },
+  ) =>
     ComponentApiClientModule.getComponents({
       log,
       timeoutOptions,
@@ -32,7 +28,7 @@ describe('getComponents', () => {
 
   it('fetches the content of the header and footer', async () => {
     // Given
-    const logger = createLogger()
+    const logger = fakeLogger()
     const scope = api()
       .get('/api/components')
       .query({ component: ['header', 'footer'] })
@@ -49,7 +45,7 @@ describe('getComponents', () => {
 
   it('fetches the content of the header and footer with classes', async () => {
     // Given
-    const logger = createLogger()
+    const logger = fakeLogger()
     const scope = api()
       .get('/api/components')
       .query({ component: ['header', 'footer'], classes: 'my-class' })
@@ -66,7 +62,7 @@ describe('getComponents', () => {
 
   it('forwards the provided user token', async () => {
     // Given
-    const logger = createLogger()
+    const logger = fakeLogger()
     const scope = api()
       .get('/api/components')
       .query(true)
@@ -82,7 +78,7 @@ describe('getComponents', () => {
 
   it('requests using the configured API URL', async () => {
     // Given
-    const logger = createLogger()
+    const logger = fakeLogger()
     const scope = nock('http://fe-components').get('/api/components').query(true).reply(200, { ok: true })
 
     // When
@@ -94,7 +90,7 @@ describe('getComponents', () => {
 
   it('returns the body of the Response', async () => {
     // Given
-    const logger = createLogger()
+    const logger = fakeLogger()
     api().get('/api/components').query(true).reply(200, { id: 42, name: 'Alice' })
 
     // When
@@ -106,7 +102,7 @@ describe('getComponents', () => {
 
   it('retries once on retryable API errors', async () => {
     // Given
-    const logger = createLogger()
+    const logger = fakeLogger()
     const scope = api()
       .get('/api/components')
       .query(true)
@@ -125,7 +121,7 @@ describe('getComponents', () => {
 
   it('logs when the retry handler finds an API error', async () => {
     // Given
-    const logger = createLogger()
+    const logger = fakeLogger()
     api()
       .get('/api/components')
       .query(true)
@@ -143,7 +139,7 @@ describe('getComponents', () => {
 
   it('does not exceed a single retry', async () => {
     // Given
-    const logger = createLogger()
+    const logger = fakeLogger()
     const scope = api().get('/api/components').query(true).reply(500).get('/api/components').query(true).reply(500)
 
     // When / Then
