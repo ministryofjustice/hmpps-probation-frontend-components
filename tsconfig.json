@@ -14,10 +14,20 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
+    "isolatedModules": true,
     "experimentalDecorators": true,
     "typeRoots": ["./src/@types", "./node_modules/@types"],
     "declaration": true
   },
-  "exclude": ["node_modules", "assets/**/*.js", "integration_tests", "dist", "cypress.config.ts", "**/*.test.ts", "**/*.test.js", "coverage"],
+  "exclude": [
+    "node_modules",
+    "assets/**/*.js",
+    "integration_tests",
+    "dist",
+    "cypress.config.ts",
+    "**/*.test.ts",
+    "**/*.test.js",
+    "coverage"
+  ],
   "include": ["**/*.js", "**/*.ts"]
 }

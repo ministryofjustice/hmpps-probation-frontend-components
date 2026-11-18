@@ -12,7 +12,7 @@ export default {
    * @param requestOptions.pdsUrl - url to the dps homepage to be used in the header
    * @param requestOptions.environmentName - if you require environment tags on the fallback banner "DEV", "PRE-PRODUCTION" or "PRODUCTION" can be passed in
    * @param requestOptions.logger - pass in the service bunyan logger so fallback/retry messages appear in your service logs. Falls back to console if not provided
-   * @param requestOptions.timeoutOptions - timeout object for superagent. Defaults to 2500ms
+   * @param requestOptions.timeoutOptions - timeout object for the HMPPS REST client. Defaults to 2500ms
    * @param requestOptions.useFallbacksByDefault - if your service requires only the basic fallback header and footer to be used by default, set this to true, it will not attempt to fetch the components from the frontend components service
    */
   getPageComponents,
