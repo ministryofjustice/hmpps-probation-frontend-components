@@ -101,7 +101,7 @@
     "@ministryofjustice/hmpps-rest-client": "2.2.0",
     "@types/nunjucks": "^3.2.6",
     "nunjucks": "^3.2.4",
-    "sanitize-html": "2.18.1"
+    "sanitize-html": "2.18.2"
   },
   "overrides": {
     "@babel/core": "^7.29.0",
