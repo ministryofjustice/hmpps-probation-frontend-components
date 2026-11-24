@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20, 22]
+        node: [24, 26]
     needs: lint
     steps:
       - name: Checkout repository
@@ -50,7 +50,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 22
+          node-version: 24
       - name: Install dependencies
         run: npm install
       - name: Clean build step
@@ -76,7 +76,7 @@ jobs:
       - name: Setup node with public npmjs.com registry
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 22
+          node-version: 24
           registry-url: 'https://registry.npmjs.org'
           scope: '@ministryofjustice'
       # Ensure npm 11.5.1 or later is installed, to support OIDC publishing
